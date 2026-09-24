@@ -12,17 +12,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Doto:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root { --ink:#000; --paper:#fff; --red:#ff2a1f; --mono:"Space Mono",ui-monospace,Menlo,Consolas,monospace; }
+  :root { --ink:#000; --paper:#fff; --red:#ff2a1f; --rest:420px; --mono:"Space Mono",ui-monospace,Menlo,Consolas,monospace; }
   * { box-sizing:border-box; margin:0; }
   html { background:var(--ink); }
-  body { min-height:100svh; display:grid; place-items:center; padding:16px 16px 26px;
+  body { min-height:100svh; display:grid; place-items:center; padding:10px 16px 14px;
          color:var(--paper); font:14px/1.4 var(--mono);
          /* Bold diagonal stripes behind everything */
          background:repeating-linear-gradient(-45deg, var(--paper) 0 14px, var(--ink) 14px 28px) fixed; }
   main { width:100%; max-width:390px; background:var(--ink); border:2px solid var(--paper);
          box-shadow:10px 10px 0 var(--ink), 10px 10px 0 2px var(--paper); }
 
-  header { display:flex; justify-content:space-between; align-items:center; padding:10px 14px;
+  header { display:flex; justify-content:space-between; align-items:center; padding:8px 14px;
            border-bottom:2px solid var(--paper); font-size:11px; letter-spacing:.14em; text-transform:uppercase; }
   .rec { display:flex; align-items:center; gap:8px; }
   .rec::before { content:""; width:9px; height:9px; border-radius:50%; background:var(--red);
@@ -30,18 +30,18 @@
   @keyframes blink { 50% { opacity:0; } }
 
   figure { position:relative; margin:0; border-bottom:2px solid var(--paper); overflow:hidden; }
-  /* Cap photo height so SAVE + WhatsApp sit above the fold on 1080x1920 phones (~360x570 usable) */
-  figure img { display:block; width:100%; height:min(calc((100vw - 36px) * 1.25), 54svh, 480px);
-               object-fit:cover; object-position:50% 65%;
+  /* Photo takes whatever height is left so the whole card fits one screen (1080x1920 phone ~360x570 usable) */
+  figure img { display:block; width:100%; height:clamp(140px, calc(100svh - var(--rest)), min(calc((100vw - 36px) * 1.25), 480px));
+               object-fit:cover; object-position:50% 60%;
                filter:grayscale(1) contrast(1.35) brightness(1.05); }
   /* Dot-matrix screen over the photo */
   figure::after { content:""; position:absolute; inset:0; pointer-events:none;
                   background:radial-gradient(circle, transparent 1.1px, rgba(0,0,0,.4) 1.6px) 0 0/3.5px 3.5px; mix-blend-mode:multiply; }
   h1 { position:absolute; left:10px; right:10px; bottom:6px; z-index:1;
-       font:900 clamp(58px, 20vw, 84px)/.9 "Doto",var(--mono); letter-spacing:-.02em; text-transform:uppercase;
+       font:900 clamp(48px, 16vw, 76px)/.9 "Doto",var(--mono); letter-spacing:-.02em; text-transform:uppercase;
        color:var(--paper); text-shadow:0 0 18px rgba(0,0,0,.8); }
 
-  .save { display:flex; justify-content:space-between; align-items:center; padding:18px 16px;
+  .save { display:flex; justify-content:space-between; align-items:center; padding:13px 16px;
           background:var(--paper); color:var(--ink); text-decoration:none;
           font:700 15px var(--mono); letter-spacing:.12em; text-transform:uppercase; }
   .save:active { background:repeating-linear-gradient(-45deg, #fff 0 6px, #ddd 6px 12px); }
@@ -49,15 +49,18 @@
   ul { list-style:none; padding:0; }
   li { border-top:2px solid var(--paper); }
   li a { display:grid; grid-template-columns:28px 1fr auto; gap:10px; align-items:baseline;
-         padding:13px 14px; color:var(--paper); text-decoration:none; overflow-wrap:anywhere; }
+         padding:9px 14px; color:var(--paper); text-decoration:none; overflow-wrap:anywhere; }
   li a:active { background:var(--paper); color:var(--ink); }
   .n { color:#777; font-size:11px; }
   .k { font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#999; }
   li a:active .n, li a:active .k { color:var(--ink); }
   .wa .k { color:var(--red); }
 
-  footer { border-top:2px solid var(--paper); padding:10px 14px; font-size:10px; letter-spacing:.14em;
+  footer { border-top:2px solid var(--paper); padding:7px 14px; font-size:10px; letter-spacing:.14em;
            text-transform:uppercase; color:#777; display:flex; justify-content:space-between; }
+
+  /* Short screens: photo is only ~150px tall, so keep the name from covering the face */
+  @media (max-height:640px) { main:not(.lock) h1 { font-size:40px; bottom:4px; } }
 
   /* Locked state (no/invalid key) */
   .lock h1 { position:static; padding:28px 14px 22px; font-size:clamp(52px, 18vw, 76px); line-height:.95; }
