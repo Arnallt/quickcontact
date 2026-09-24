@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#000; --paper:#fff; --red:#ff2a1f; --mono:"Space Mono",ui-monospace,Menlo,Consolas,monospace; }
+  * { box-sizing:border-box; margin:0; }
+  html { background:var(--ink); }
+  body { min-height:100svh; display:grid; place-items:center; padding:16px 16px 26px;
+         color:var(--paper); font:14px/1.4 var(--mono);
+         /* Bold diagonal stripes behind everything */
+         background:repeating-linear-gradient(-45deg, var(--paper) 0 14px, var(--ink) 14px 28px) fixed; }
+  main { width:100%; max-width:390px; background:var(--ink); border:2px solid var(--paper);
+         box-shadow:10px 10px 0 var(--ink), 10px 10px 0 2px var(--paper); }
+
+  header { display:flex; justify-content:space-between; align-items:center; padding:10px 14px;
+           border-bottom:2px solid var(--paper); font-size:11px; letter-spacing:.14em; text-transform:uppercase; }
+  .rec { display:flex; align-items:center; gap:8px; }
+  .rec::before { content:""; width:9px; height:9px; border-radius:50%; background:var(--red);
+                 animation:blink 1.6s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+
+  figure { position:relative; margin:0; border-bottom:2px solid var(--paper); overflow:hidden; }
+  /* Cap photo height so SAVE + WhatsApp sit above the fold on 1080x1920 phones (~360x570 usable) */
+  figure img { display:block; width:100%; height:min(calc((100vw - 36px) * 1.25), 54svh, 480px);
+               object-fit:cover; object-position:50% 88%;
+               filter:grayscale(1) contrast(1.35) brightness(1.05); }
+  /* Dot-matrix screen over the photo */
+  figure::after { content:""; position:absolute; inset:0; pointer-events:none;
+                  background:radial-gradient(circle, transparent 1.1px, rgba(0,0,0,.4) 1.6px) 0 0/3.5px 3.5px; mix-blend-mode:multiply; }
+  h1 { position:absolute; left:10px; right:10px; bottom:6px; z-index:1;
+       font:900 clamp(58px, 20vw, 84px)/.9 "Doto",var(--mono); letter-spacing:-.02em; text-transform:uppercase;
+       color:var(--paper); text-shadow:0 0 18px rgba(0,0,0,.8); }
+
+  .save { display:flex; justify-content:space-between; align-items:center; padding:18px 16px;
+          background:var(--paper); color:var(--ink); text-decoration:none;
+          font:700 15px var(--mono); letter-spacing:.12em; text-transform:uppercase; }
+  .save:active { background:repeating-linear-gradient(-45deg, #fff 0 6px, #ddd 6px 12px); }
+
+  ul { list-style:none; padding:0; }
+  li { border-top:2px solid var(--paper); }
+  li a { display:grid; grid-template-columns:28px 1fr auto; gap:10px; align-items:baseline;
+         padding:13px 14px; color:var(--paper); text-decoration:none; overflow-wrap:anywhere; }
+  li a:active { background:var(--paper); color:var(--ink); }
+  .n { color:#777; font-size:11px; }
+  .k { font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#999; }
+  li a:active .n, li a:active .k { color:var(--ink); }
+  .wa .k { color:var(--red); }
+
+  footer { border-top:2px solid var(--paper); padding:10px 14px; font-size:10px; letter-spacing:.14em;
+           text-transform:uppercase; color:#777; display:flex; justify-content:space-between; }
+
+  /* Locked state (no/invalid key) */
+  .lock h1 { position:static; padding:28px 14px 22px; font-size:clamp(52px, 18vw, 76px); line-height:.95; }
+  .lock p { padding:0 14px 18px; color:#999; font-size:12px; }
+  .loading .lock { visibility:hidden; }
+</style>
+</head>
+<body>
+<main class="lock">
+  <header><span class="rec">Locked</span><span>No. 001</span></header>
+  <h1>Scan<br>the<br>QR</h1>
+  <p>This card only opens from its QR code.</p>
+</main>
+<script>
+(async () => {
+  // Key lives only in the URL fragment (#...), which browsers never send to the server.
+  let k = location.hash.slice(1);
+  try { k ? sessionStorage.setItem('k', k) : (k = sessionStorage.getItem('k') || ''); } catch {}
+  if (!k) return;
+  document.documentElement.classList.add('loading');
+  try {
+    const b64 = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    const key = await crypto.subtle.importKey('raw', b64(k), 'AES-GCM', false, ['decrypt']);
+    const buf = await (await fetch('data.bin', { cache: 'no-cache' })).arrayBuffer();
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: buf.slice(0, 12) }, key, buf.slice(12));
+    const d = JSON.parse(new TextDecoder().decode(pt));
+    document.querySelector('main').outerHTML = d.html;
+    document.title = d.title;
+    document.querySelector('[data-src=me]').src = URL.createObjectURL(new Blob([b64(d.me)], { type: 'image/jpeg' }));
+    document.querySelector('[data-href=vcf]').href = URL.createObjectURL(new Blob([d.vcf], { type: 'text/vcard' }));
+    // Hide the key from the address bar so a casual "share page" doesn't pass it on.
+    history.replaceState(null, '', location.pathname);
+  } catch (e) {
+    try { sessionStorage.removeItem('k'); } catch {}
+  }
+  document.documentElement.classList.remove('loading');
+})();
+</script>
+</body>
+</html>
