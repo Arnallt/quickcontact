@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Doto:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root { --ink:#000; --paper:#fff; --red:#ff2a1f; --rest:420px; --mono:"Space Mono",ui-monospace,Menlo,Consolas,monospace; }
+  :root { --ink:#000; --paper:#fff; --red:#ff2a1f; --rest:340px; --mono:"Space Mono",ui-monospace,Menlo,Consolas,monospace; }
   * { box-sizing:border-box; margin:0; }
   html { background:var(--ink); }
   body { min-height:100svh; display:grid; place-items:center; padding:10px 16px 14px;
@@ -59,8 +59,8 @@
   footer { border-top:2px solid var(--paper); padding:7px 14px; font-size:10px; letter-spacing:.14em;
            text-transform:uppercase; color:#777; display:flex; justify-content:space-between; }
 
-  /* Short screens: photo is only ~150px tall, so keep the name from covering the face */
-  @media (max-height:640px) { main:not(.lock) h1 { font-size:40px; bottom:4px; } }
+  /* Very short screens: photo drops to ~150px, so keep the name from covering the face */
+  @media (max-height:500px) { main:not(.lock) h1 { font-size:40px; bottom:4px; } }
 
   /* Locked state (no/invalid key) */
   .lock h1 { position:static; padding:28px 14px 22px; font-size:clamp(52px, 18vw, 76px); line-height:.95; }
